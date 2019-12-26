@@ -1,9 +1,13 @@
 # UPS-Lite
 
-This is the (rewritten) script to check the state of the UPS-Lite. It has been extended to publish the current state via MQTT.
+This is a (rewritten) script to check the state of the UPS-Lite. It has been extended to publish the current state via MQTT. The topics are hardcoded
+- ups-lite/voltage
+- ups-lite/capacity
+
+It is still a work in progress.
 
 # MQTT
-All relevant date to connect to the broker are stored in the file mqtt_config.py. There exists an example file named mqtt_config_default.py
+All relevant date to connect to the broker are stored in the file mqtt_config.py. There exists an example file named mqtt_config_default.py. Before you can start, you need of course an MQTT-Broker and you need to install paho-mqtt via `sudo pip3 install paho-mqtt`
 
 # Systemd service
 copy the file "UPS_Lite.service" into "/lib/systemd/system/"
