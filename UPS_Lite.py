@@ -3,6 +3,8 @@ import struct
 import smbus
 import sys
 import time
+import paho.mqtt.client as mqtt
+import mqtt_config
 
 class UPS():
         
@@ -45,6 +47,33 @@ class UPS():
                         return True
                 return False
              
+class MQTT:
+
+        def __init__(self,client_username,client_passwd,broker_ip,broker_port):
+                self.broker_ip = broker_ip
+                self.broker_port = broker_port
+                self.is_connected = False
+                self.client = mqtt.Client()
+                self.client.username_pw_set(username=client_username,password=client_passwd)
+
+        def connect2broker(self):
+                try:
+                        self.client.connect(self.broker_ip,self.broker_port) #connect to broker
+                        self.is_connected = True
+                except:
+                        print("connection failed")
+                        self.is_connected = False
+                        exit(1) #Should quit or raise flag to quit or retry
+
+        def publishState(self,UPS_class):
+                if self.is_connected:
+                        voltage = UPS_class.read_voltage()
+                        print("[-] Publishing: ups-light/voltage %s" % voltage)
+                        self.client.publish("ups-light/voltage",voltage)
+                        capacity = UPS_class.read_capacity()
+                        print("[-] Publishing: ups-light/capacity %s" % capacity)
+                        self.client.publish("ups-light/capacity",capacity)
+
 def main():
             
         ups_lite = UPS()
@@ -58,5 +87,9 @@ def main():
                 print("[-] Battery is fully charged")
         print("[-] Voltage: %s" % voltage)
         print("[-] Capacitiy: %s" % capacity)
-        
+
+        mqtt = MQTT(client_username, client_passwd, broker_ip, broker_port)
+        mqtt.connect2broker()
+        mqtt.publishState(self,ups_lite)
+
 main()
