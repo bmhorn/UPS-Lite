@@ -68,12 +68,12 @@ class MQTT:
         def publishState(self,UPS_class):
                 if self.is_connected:
                         voltage = UPS_class.read_voltage()
-                        print("[-] Publishing: ups-light/voltage %s" % voltage)
-                        self.client.publish("ups-light/voltage",voltage)
+                        print("[-] Publishing: ups-lite/voltage %s" % voltage)
+                        self.client.publish("ups-lite/voltage",voltage)
                         time.sleep(1)
                         capacity = UPS_class.read_capacity()
-                        print("[-] Publishing: ups-light/capacity %s" % capacity)
-                        self.client.publish("ups-light/capacity",capacity)
+                        print("[-] Publishing: ups-lite/capacity %s" % capacity)
+                        self.client.publish("ups-lite/capacity",capacity)
                         self.client.disconnect()
                         self.is_connected = False
 
