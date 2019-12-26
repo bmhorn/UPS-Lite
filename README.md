@@ -4,6 +4,11 @@ I like the (rewritten) script a lot, but it doesn't give much information. I als
 
 Please note that I'm not a seasoned developer / debugger and this is work in progress... ;)
 
+# Systemd service
+copy the file into "/lib/systemd/system/" 
+and then change the permissions sudo chmod 644 /lib/systemd/system/UPL_Lite.service
+
+
 ## Wishlist... 
 as said: I'm spoiled with the output of [pico_status.py](https://github.com/Siewert308SW/pico_status):
 ![alt text](https://github.com/Siewert308SW/pico_status/blob/master/pico_status.png "pico_status.py output")
