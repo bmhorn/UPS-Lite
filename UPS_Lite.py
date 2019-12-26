@@ -22,10 +22,9 @@ class UPS():
                 voltage = swapped * 1.25 /1000/16
                 return voltage
 
-
         def read_capacity(self):
                 
-                # This function returns the ramaining capacitiy in int as precentage of the battery connect to the UPS-Lite
+                # This function returns the remaining capacitiy in int as precentage of the battery connect to the UPS-Lite
                 address = 0x36
                 read = self.bus.read_word_data(address, 4)
                 swapped = struct.unpack("<H", struct.pack(">H", read))[0]
@@ -53,7 +52,12 @@ def main():
         capacity = ups_lite.read_capacity()
         is_low = ups_lite.is_battery_low(capacity)
         is_full = ups_lite.is_battery_full(capacity)
-        
+        if(is_low){
+                print("[-] Warning: Low battery")
+        }
+        elseif(is_full){
+                print("[-] Battery is fully charged")
+        }
         print("[-] Voltage: %s" % voltage)
         print("[-] Capacitiy: %s" % capacity)
         
