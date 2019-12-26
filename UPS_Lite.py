@@ -92,9 +92,9 @@ def main():
         print("[-] Capacitiy: %s" % capacity)
 
         mqtt = MQTT(config.client_username, config.client_passwd, config.broker_ip, config.broker_port)
-        mqtt.connect2broker()
-
+        
         while(True):
+                mqtt.connect2broker()
                 mqtt.publishState(ups_lite)
                 time.sleep(30)
 
