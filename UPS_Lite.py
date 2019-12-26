@@ -93,6 +93,9 @@ def main():
 
         mqtt = MQTT(config.client_username, config.client_passwd, config.broker_ip, config.broker_port)
         mqtt.connect2broker()
-        mqtt.publishState(ups_lite)
+
+        while(True):
+                mqtt.publishState(ups_lite)
+                time.sleep(30)
 
 main()
