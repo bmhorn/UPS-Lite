@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import struct
 import smbus
 import sys
 import time
 import paho.mqtt.client as mqtt
-import mqtt_config
+import mqtt_config as config
 
 class UPS():
         
@@ -88,8 +88,8 @@ def main():
         print("[-] Voltage: %s" % voltage)
         print("[-] Capacitiy: %s" % capacity)
 
-        mqtt = MQTT(client_username, client_passwd, broker_ip, broker_port)
+        mqtt = MQTT(config.client_username, config.client_passwd, config.broker_ip, config.broker_port)
         mqtt.connect2broker()
-        mqtt.publishState(self,ups_lite)
+        mqtt.publishState(ups_lite)
 
 main()
