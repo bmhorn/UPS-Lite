@@ -52,12 +52,10 @@ def main():
         capacity = ups_lite.read_capacity()
         is_low = ups_lite.is_battery_low(capacity)
         is_full = ups_lite.is_battery_full(capacity)
-        if(is_low){
+        if(is_low):
                 print("[-] Warning: Low battery")
-        }
-        elseif(is_full){
+        elseif(is_full):
                 print("[-] Battery is fully charged")
-        }
         print("[-] Voltage: %s" % voltage)
         print("[-] Capacitiy: %s" % capacity)
         
