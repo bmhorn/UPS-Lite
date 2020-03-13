@@ -1,5 +1,4 @@
 # UPS-Lite
-
 This is a (rewritten) script to check the state of the UPS-Lite. It has been extended to publish the current state via MQTT. The topics are hardcoded
 - ups-lite/voltage
 - ups-lite/capacity
@@ -27,4 +26,3 @@ and enable service
 ## Wishlist... 
 - Powering mode
 - Charge state
-- Temperature
