@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import struct
 import smbus
 import sys
@@ -14,6 +15,21 @@ class UPS():
                 self.bus = smbus.SMBus(1)
                 # set low capacity alert for the battery
                 self.low_capacity = 20
+                self.full_capacity = 100
+
+        def read_prev_values(self):
+                # This function is to read the previous capacity to determing battery Status
+                try:
+                    with open("/tmp/ups_lite_capacity.tmp","r") as tmpfile:
+                        all_values = tmpfile.read()
+
+                        prev_capacity,prev_status = all_values.split(':')
+
+                except FileNotFoundError:
+                        prev_capacity = "1000"
+                        prev_status = "Too_soon_to_tell"
+                return int(prev_capacity),prev_status
+
 
         def read_voltage(self):
 
@@ -24,29 +40,56 @@ class UPS():
                 voltage = swapped * 1.25 /1000/16
                 return voltage
 
+
         def read_capacity(self):
                 
                 # This function returns the remaining capacitiy in int as precentage of the battery connect to the UPS-Lite
                 address = 0x36
                 read = self.bus.read_word_data(address, 4)
                 swapped = struct.unpack("<H", struct.pack(">H", read))[0]
-                capacity = swapped/256
-                return int(capacity)
+                capacity = int(swapped/256)
         
-        def is_battery_full(self,capacity):
-                
+                # Write capacity to tempfile. Needed to determine state.
+                tmpfile= open("/tmp/ups_lite_capacity.tmp","w+")
+                tmpfile.write(str(capacity))
+                tmpfile.close
                 # This function returns True if the battery is full, else return False
-                if(capacity == 100):
-                        return True
-                return False
+                return capacity
         
-        def is_battery_low(self,capacity):
-                
-                # This function returns True if the battery capacity is low, else return False
-                if(capacity <= self.low_capacity):
-                        return True
-                return False
-             
+        def read_state(self,capacity,prev_capacity,prev_state):
+	        # Write capacity to tempfile. Needed to determine state.
+                if(capacity >= self.full_capacity):
+                    state = "CHARGED"
+                # low if not charging and below 20 based on voltage, else discharging
+                elif(int(prev_capacity) > int(capacity)) and (prev_capacity != int(1000)):
+                    if(capacity <= self.low_capacity):
+                        state = "LOW"
+                    else:
+                        state = "DISCHARGING"
+                elif(int(prev_capacity) > int(capacity)) and (prev_capacity == int(1000)):
+                       state = "Too_soon_to_tell"
+                elif(int(prev_capacity) < int(capacity)):
+                    status = "CHARGING"
+                elif(int(prev_capacity) == int(capacity)):
+                    state = prev_state
+                else:
+                    state = "Too_soon_to_tell"
+             	
+                # Append status to tmp File
+                tmpfile= open("/tmp/ups_lite_capacity.tmp","a+")
+                tmpfile.write(":")
+                tmpfile.write(str(state))
+                tmpfile.close
+                return state
+
+
+	def read_temp(self):
+                import os
+                stream = os.popen('/opt/vc/bin/vcgencmd measure_temp')
+                temp = stream.read()
+                bla, temp = temp.split("=",2)
+                return temp
+
 class MQTT:
 
         def __init__(self,client_username,client_passwd,broker_ip,broker_port):
@@ -67,29 +110,36 @@ class MQTT:
 
         def publishState(self,UPS_class):
                 if self.is_connected:
-                        voltage = UPS_class.read_voltage()
-                        print("[-] Publishing: ups-lite/voltage %s" % voltage)
+                        prev_capacity,prev_dev_state = UPS_class.read_prev_values()
+			voltage = UPS_class.read_voltage()
+			capacity = UPS_class.read_capacity()
+			dev_state = UPS_class.read_state(capacity,prev_capacity,prev_dev_state)
+        		temp = UPS_class.read_temp()
+
+			print("[-] Publishing: ups-lite/voltage %s" % voltage)
                         self.client.publish("ups-lite/voltage",voltage)
                         time.sleep(1)
-                        capacity = UPS_class.read_capacity()
                         print("[-] Publishing: ups-lite/capacity %s" % capacity)
                         self.client.publish("ups-lite/capacity",capacity)
-                        self.client.disconnect()
+                        time.sleep(1)
+			print("[-] Publishing: ups-lite/dev_state %s" % dev_state)
+                        self.client.publish("ups-lite/dev_state",dev_state)
+                        time.sleep(1)
+			print("[-] Publishing: ups-lite/temperature %s" % temp)
+                        self.client.publish("ups-lite/temperature",temp)
+                        time.sleep(1)
+			
+			self.client.disconnect()
                         self.is_connected = False
 
 def main():
             
         ups_lite = UPS()
+        prev_capacity,prev_state = ups_lite.read_prev_values()
         voltage = ups_lite.read_voltage()
         capacity = ups_lite.read_capacity()
-        is_low = ups_lite.is_battery_low(capacity)
-        is_full = ups_lite.is_battery_full(capacity)
-        if(is_low):
-                print("[-] Warning: Low battery")
-        elif(is_full):
-                print("[-] Battery is fully charged")
-        print("[-] Voltage: %s" % voltage)
-        print("[-] Capacitiy: %s" % capacity)
+        status = ups_lite.read_state(capacity,prev_capacity,prev_state)
+        temp = ups_lite.read_temp()
 
         mqtt = MQTT(config.client_username, config.client_passwd, config.broker_ip, config.broker_port)
         
