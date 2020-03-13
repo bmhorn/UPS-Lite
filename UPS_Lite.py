@@ -18,17 +18,17 @@ class UPS():
                 self.full_capacity = 100
 
         def read_prev_values(self):
-                # This function is to read the previous capacity to determing battery Status
+                # This function is to read the previous capacity to determing battery state
                 try:
                     with open("/tmp/ups_lite_capacity.tmp","r") as tmpfile:
                         all_values = tmpfile.read()
 
-                        prev_capacity,prev_status = all_values.split(':')
+                        prev_capacity,prev_state = all_values.split(':')
 
                 except FileNotFoundError:
                         prev_capacity = "1000"
-                        prev_status = "Too_soon_to_tell"
-                return int(prev_capacity),prev_status
+                        prev_state = "Too_soon_to_tell"
+                return int(prev_capacity),prev_state
 
 
         def read_voltage(self):
@@ -69,13 +69,13 @@ class UPS():
                 elif(int(prev_capacity) > int(capacity)) and (prev_capacity == int(1000)):
                        state = "Too_soon_to_tell"
                 elif(int(prev_capacity) < int(capacity)):
-                    status = "CHARGING"
+                    state = "CHARGING"
                 elif(int(prev_capacity) == int(capacity)):
                     state = prev_state
                 else:
                     state = "Too_soon_to_tell"
              	
-                # Append status to tmp File
+                # Append state to tmp File
                 tmpfile= open("/tmp/ups_lite_capacity.tmp","a+")
                 tmpfile.write(":")
                 tmpfile.write(str(state))
@@ -138,7 +138,7 @@ def main():
         prev_capacity,prev_state = ups_lite.read_prev_values()
         voltage = ups_lite.read_voltage()
         capacity = ups_lite.read_capacity()
-        status = ups_lite.read_state(capacity,prev_capacity,prev_state)
+        state = ups_lite.read_state(capacity,prev_capacity,prev_state)
         temp = ups_lite.read_temp()
 
         mqtt = MQTT(config.client_username, config.client_passwd, config.broker_ip, config.broker_port)
