@@ -96,7 +96,7 @@ class MQTT:
                 self.broker_ip = broker_ip
                 self.broker_port = broker_port
                 self.is_connected = False
-                self.client = mqtt.Client()
+                self.client = mqtt.Client(client_id="ups-lite_1")
                 self.client.username_pw_set(username=client_username,password=client_passwd)
 
         def connect2broker(self):
@@ -146,6 +146,6 @@ def main():
         while(True):
                 mqtt.connect2broker()
                 mqtt.publishState(ups_lite)
-                time.sleep(30)
+                time.sleep(300)
 
 main()
