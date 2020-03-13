@@ -3,6 +3,8 @@
 This is a (rewritten) script to check the state of the UPS-Lite. It has been extended to publish the current state via MQTT. The topics are hardcoded
 - ups-lite/voltage
 - ups-lite/capacity
+- ups-lite/temperature
+- ups-lite/dev_state
 
 It is still a work in progress.
 
