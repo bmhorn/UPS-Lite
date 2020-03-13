@@ -83,8 +83,7 @@ class UPS():
                 return state
 
 
-	def read_temp(self):
-                import os
+        def read_temp(self):
                 stream = os.popen('/opt/vc/bin/vcgencmd measure_temp')
                 temp = stream.read()
                 bla, temp = temp.split("=",2)
