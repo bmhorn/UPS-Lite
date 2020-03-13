@@ -87,7 +87,8 @@ class UPS():
                 stream = os.popen('/opt/vc/bin/vcgencmd measure_temp')
                 temp = stream.read()
                 bla, temp = temp.split("=",2)
-                return temp
+                temp, bla = temp.split("'",2)
+                return float(temp)
 
 class MQTT:
 
